@@ -37,7 +37,9 @@ jobs:
         key: ${{ secrets.PRIVATE_KEY }}
         port: 22
         script: |
-          cd /var/www/servers/server-kitecole-order-service
+          cd /var/www/servers/server-e-luxe/server-e-luxe-order-service
+          git reset --hard HEAD
+          git clean -fd
           git pull origin main
           npm install
           tsc --build --force tsconfig.json
