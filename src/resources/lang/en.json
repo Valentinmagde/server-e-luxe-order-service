@@ -1,0 +1,50 @@
+{
+	"order": {
+		"orderNotFound": "Order does not exits",
+		"invalidOrderId": "Invalid order id",
+		"invalidUserId": "Invalid user id"
+	},
+	"shippingZone": {
+		"shippingZoneNotFound": "Shipping zone does not exits",
+		"invalidShippingZoneId": "Invalid shipping zone id"
+	},
+	"shippingPrice": {
+		"shippingPriceNotFound": "Shipping price does not exits",
+		"invalidShippingPriceId": "Invalid shipping price id"
+	},
+	"shippingMethod": {
+		"shippingMethodNotFound": "Shipping method does not exits",
+		"invalidShippingMethodId": "Invalid shipping method id",
+		"invalidDepartureId": "Invalid departure",
+		"invalidArrivalId": "Invalid arrival"
+	},
+	"orderCounter": {
+		"orderCounterNotFound": "Order counter not found"
+	},
+	"country": {
+		"countryNotFound": "Country does not exits",
+		"invalidCountryId": "Invalid country id"
+	},
+	"user": {
+		"unauthorize": {
+			"noToken": "No token",
+			"invalidToken": "Invalid token",
+			"invalidAdminToken": "Invalid admin token",
+			"invalidSellerToken": "Invalid seller token",
+			"invalidAdminOrSeller": "Invalid admin or seller token",
+			"invalidRefreshToken": "Invalid refresh token",
+			"noRefreshToken": "No refresh token"
+		}
+	},
+	"others": {
+		"routeNotFound": "Route not found"
+	},
+	"config": {
+		"cache": {
+			"redis": {
+				"redisConnectionTo": "Redis connection to",
+				"failed": "failed"
+			}
+		}
+	}
+}

@@ -1,0 +1,16 @@
+responses:
+  schemas:    
+    500:
+      type: object
+      properties:
+        status:
+          type: string
+          example: FAILED
+        data:
+          type: object
+          properties:
+            errNo:
+              type: integer
+              example: 259
+            errMsg:
+              type: string

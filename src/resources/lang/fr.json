@@ -1,0 +1,50 @@
+{
+    "user": {
+        "unauthorize": {
+            "noToken": "Pas de jeton",
+            "invalidToken": "Jeton non valide",
+            "invalidAdminToken": "Jeton d'administration invalide",
+            "invalidSellerToken": "Jeton de vendeur invalide",
+            "invalidAdminOrSeller": "Jeton d'administrateur ou de vendeur invalide",
+            "invalidRefreshToken": "Jeton de rafraîchissement invalide",
+            "noRefreshToken": "Pas de jeton de rafraîchissement"
+        }
+    },
+    "order": {
+        "orderNotFound": "Cette commande n'existe pas",
+        "invalidOrderId": "L'identifiant de cette commande n'est pas valide",
+        "invalidUserId": "L'identifiant de cet utilisateur n'est pas valide"
+    },
+    "shippingZone": {
+        "shippingZoneNotFound": "La zone de livraison n'exist pas",
+        "invalidShippingZoneId": "L'identifiant de la zone d'expédition n'est pas valide"
+    },
+    "shippingPrice": {
+        "shippingPriceNotFound": "Ce prix d'expédition n'existe pas",
+        "invalidShippingPriceId": "L'identifiant du prix d'expédition n'est pas valide",
+        "invalidDepartureId": "Le depart n'est pas valide",
+		"invalidArrivalId": "L'arrivée n'est pas valide"
+    },
+    "shippingMethod": {
+		"shippingMethodNotFound": "La méthode d'expédition n'exist pas",
+		"invalidShippingMethodId": "L'identifiant de la méthode d'expédition n'est pas valide"
+	},
+    "orderCounter": {
+		"orderCounterNotFound": "Compteur de commande introuvable"
+	},
+    "country": {
+        "countryNotFound": "Ce pays n'existe pas",
+		"invalidCountryId": "L'identifiant de ce pays n'est pas valide"
+    },
+    "others": {
+        "routeNotFound": "Itinéraire non trouvé"
+    },
+    "config": {
+        "cache": {
+            "redis": {
+                "redisConnectionTo": "La connexion Redis à",
+			    "failed": "a échoué"
+            }
+        }
+    }
+}

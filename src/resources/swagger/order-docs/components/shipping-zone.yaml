@@ -1,0 +1,24 @@
+components:
+  schemas:
+    ShippingZone:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        paymentMethods:
+          type: array
+          items:
+            type: string
+            description: Payment methods's id
+        country:
+          type: string
+        tax:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time

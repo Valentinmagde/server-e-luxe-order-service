@@ -1,0 +1,20 @@
+responses:
+  schemas:    
+    412:
+      type: object
+      properties:
+        status:
+          type: string
+          example: FAILED
+        data:
+          type: object
+          properties:
+            errNo:
+              type: integer
+              example: 6
+            errMsg:
+              type: object
+              description: This property contains all input fields with their error messages in an array.
+              properties:
+                fields:
+                  type: array

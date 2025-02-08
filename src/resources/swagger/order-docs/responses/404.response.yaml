@@ -1,0 +1,16 @@
+responses:
+  schemas:    
+    404:
+      type: object
+      properties:
+        status:
+          type: string
+          example: FAILED
+        data:
+          type: object
+          properties:
+            errNo:
+              type: integer
+              example: 26
+            errMsg:
+              type: string

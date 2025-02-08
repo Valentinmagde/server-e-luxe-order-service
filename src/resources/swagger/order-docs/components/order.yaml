@@ -1,0 +1,137 @@
+components:
+  schemas:
+    Order:
+      type: object
+      properties:
+        _id:
+          type: string
+        order_items:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of item
+                example: Pencil
+              qty:
+                type: number
+                description: Quantity of item
+                example: 1
+              image:
+                type: string
+                description: Url of item image
+              price:
+                type: number
+                description: Item price
+              product:
+                type: number
+                description: Item ID
+        shipping_address:
+          type: object
+          properties:
+            full_name:
+              type: string
+              description: The customer's name.
+              example: Herman
+            company:
+              type: string
+              description: The company's name.
+              example: Kitecole
+            state:
+              type: string
+              description: The customer's name.
+              example: Yaounde
+            address:
+              type: string
+              description: The customer's address.
+              example: Yaounde, Biyem-assi
+            city:
+              type: string
+              description: The customer's city.
+              example: Yaounde
+            postal_code:
+              type: string
+              description: The customer's postal code.
+              example: Yaounde
+            country:
+              type: string
+              description: The customer's country.
+              example: Cameroon
+            phone:
+              type: string
+              description: The customer's phone number.
+            email:
+              type: string
+              description: The customer's email.
+            latlatitude:
+              type: number
+              description: The customer address latitude.
+            longitude:
+              type: number
+              description: The longitude of customer address.
+        payment_method:
+          type: string
+          description: The payment method.
+          example: Paypal
+        payment_result:
+          type: object
+          properties:
+            id:
+              type: string
+              description: The payment result id
+            status:
+              type: string
+              description: The payment status
+            update_time:
+              type: string
+              description: The payment update time
+              format: date-time
+            email_address:
+              type: string
+              description: The payment email address
+              format: date-time
+        items_price:
+          type: number
+          description: Total items price
+        shipping_price:
+          type: number
+          description: The shipping price
+        tax_price:
+          type: number
+          description: The tax price
+        total_price:
+          type: number
+          description: The total price
+        delivery_note:
+          type: string
+          description: Delivery note
+        user:
+          type: string
+          description: The customer ID
+        seller:
+          type: string
+          description: The seller ID
+        order_number:
+          type: number
+          description: The order number
+        is_paid:
+          type: boolean
+          description: The order paid status
+        paid_at:
+          type: string
+          format: date-time
+          description: The order payment date
+        is_delivered:
+          type: boolean
+          description: The order delivery staus
+        delivered_at:
+          type: string
+          format: date-time
+          description: The order delivery date
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time

@@ -1,0 +1,21 @@
+components:
+  schemas:
+    ShippingPrice:
+      type: object
+      properties:
+        _id:
+          type: string
+        departure:
+          type: string
+        arrival:
+          type: string
+        price:
+          type: number
+        tax:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time

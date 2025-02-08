@@ -1,0 +1,15 @@
+components:
+  schemas:
+    OrderCounter:
+      type: object
+      properties:
+        _id:
+          type: string
+        sequence_value:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
