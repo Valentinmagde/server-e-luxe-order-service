@@ -364,6 +364,7 @@ class OrderController {
                 order_id: createdOrder._id,
                 message: createdOrder.payment_description,
                 user_id: createdOrder.user,
+                type: "order"
               });
 
               await rabbitmqManager.publishMessage("eluxe.order.updateProductStock", "updateProductStock", {

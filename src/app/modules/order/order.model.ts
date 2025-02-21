@@ -66,7 +66,7 @@ const orderSchema = new mongoose.Schema(
       default: "Pending",
       enum: ["Pending", "Processing", "Delivered", "Cancel"],
     },
-    delivered_at: { type: Date, default: "0000-00-00 00:00:00" },
+    delivered_at: { type: Date, default: null },
   },
   {
     timestamps: {

@@ -622,7 +622,6 @@ class OrderService {
     return new Promise((resolve, reject) => {
       (async () => {
         try {
-          console.log(data);
           const order = new Order(data);
 
           const createdOrder = await order.save();
