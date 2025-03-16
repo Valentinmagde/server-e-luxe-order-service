@@ -42,5 +42,5 @@ jobs:
           git clean -fd
           git pull origin main
           npm install
-          tsc --build --force tsconfig.json
-          pm2 reload all
+          npm run build
+          pm2 restart e-luxe-order-service

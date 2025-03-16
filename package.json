@@ -1,5 +1,5 @@
 {
-  "name": "userservice",
+  "name": "order-service",
   "version": "1.0.0",
   "description": "This is a service to manage Users API",
   "main": "server.ts",
@@ -9,7 +9,8 @@
     "start-dev": "NODE_ENV=development nodemon --watch src/** --ext ts,json --ignore src/**/*.spec.ts --exec ts-node --files server.ts",
     "start-prod": "NODE_ENV=production nodemon --watch src/** --ext ts,json --ignore src/**/*.spec.ts --exec ts-node --files server.ts",
     "lint": "eslint .",
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc --build --force tsconfig.json && cp -r src/resources build/src/"
   },
   "author": "Iosys Pvt Ltd",
   "license": "MIT",
