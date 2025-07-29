@@ -225,7 +225,10 @@ class OrderController {
    *
    * @return {Promise<void>} the eventual completion or failure
    */
-  public async getBestSellerProductChart(req: Request, res: Response): Promise<void> {
+  public async getBestSellerProductChart(
+    req: Request,
+    res: Response
+  ): Promise<void> {
     orderService
       .getBestSellerProductChart()
       .then((result) => {
@@ -291,7 +294,10 @@ class OrderController {
    *
    * @return {Promise<void>} the eventual completion or failure
    */
-  public async getDashboardRecentOrders(req: Request, res: Response): Promise<void> {
+  public async getDashboardRecentOrders(
+    req: Request,
+    res: Response
+  ): Promise<void> {
     orderService
       .getDashboardRecentOrders(req.query)
       .then((result) => {
@@ -350,50 +356,81 @@ class OrderController {
 
             return customResponse.error(response, res);
           } else {
-            (async() => {
+            (async () => {
               const createdOrder: any = await orderService.store(reqBody);
 
-              const countNumber: any = await orderCounterService.getSequenceNextValue("orderId");
+              const countNumber: any =
+                await orderCounterService.getSequenceNextValue("orderId");
 
               await orderService.patch(createdOrder._id, [
                 { op: "add", path: "/order_number", value: countNumber },
-                { op: "add", path: "/invoice", value: generateInvoiceNumber(countNumber) },
+                {
+                  op: "add",
+                  path: "/invoice",
+                  value: generateInvoiceNumber(countNumber),
+                },
               ]);
 
-              await rabbitmqManager.publishMessage("eluxe.order.createOrderNotification", "createOrderNotification", {
-                order_id: createdOrder._id,
-                message: createdOrder.payment_description,
-                user_id: createdOrder.user,
-                type: "order"
-              });
+              await rabbitmqManager.publishMessage(
+                "eluxe.order.createOrderNotification",
+                "createOrderNotification",
+                {
+                  order_id: createdOrder._id,
+                  message: createdOrder.payment_description,
+                  user_id: createdOrder.user,
+                  type: "order",
+                }
+              );
 
-              await rabbitmqManager.publishMessage("eluxe.order.updateProductStock", "updateProductStock", {
-                productItems: reqBody.order_items.map((e: any) => ({
-                  _id: e._id,
-                  qty: e.qty,
-                })),
-              });
+              await rabbitmqManager.publishMessage(
+                "eluxe.order.processOrderCommission",
+                "processOrderCommission",
+                {
+                  order_id: createdOrder._id,
+                  profit_grids: reqBody.profit_grids,
+                  order_items: reqBody.order_items,
+                  user_id: createdOrder.user,
+                }
+              );
 
-              await rabbitmqManager.publishMessage("eluxe.order.confirmPayment", "confirmPayment", {
-                name: reqBody.shipping_address.full_name,
-                email: reqBody.shipping_address.email,
-                phone: reqBody.shipping_address.phone,
-                payment_method: reqBody.payment_method,
-                payment_data: reqBody?.payment_data,
-                order: createdOrder._id,
-                amount: reqBody.total,
-                currency: reqBody.currency,
-                confirm: true,
-                description: reqBody.payment_description || "",
-                user: reqBody.user,
-              });
+              await rabbitmqManager.publishMessage(
+                "eluxe.order.updateProductStock",
+                "updateProductStock",
+                {
+                  productItems: reqBody.order_items.map((e: any) => ({
+                    _id: e._id,
+                    qty: e.qty,
+                  })),
+                }
+              );
+
+              await rabbitmqManager.publishMessage(
+                "eluxe.order.confirmPayment",
+                "confirmPayment",
+                {
+                  name: reqBody.shipping_address.full_name,
+                  email: reqBody.shipping_address.email,
+                  phone: reqBody.shipping_address.phone,
+                  payment_method: reqBody.payment_method,
+                  payment_data: reqBody?.payment_data,
+                  order: createdOrder._id,
+                  amount: reqBody.total,
+                  currency: reqBody.currency,
+                  confirm: true,
+                  description: reqBody.payment_description || "",
+                  user: reqBody.user,
+                }
+              );
 
               createdOrder.order_number = countNumber;
 
-              return customResponse.success({
-                status: statusCode.httpCreated,
-                data: createdOrder,
-              }, res);
+              return customResponse.success(
+                {
+                  status: statusCode.httpCreated,
+                  data: createdOrder,
+                },
+                res
+              );
             })();
             // orderService
             //   .store(reqBody)
@@ -533,8 +570,10 @@ class OrderController {
 
     // check if user id is valid
     if (checkObjectId(orderId)) {
+      const body = req.body;
+
       orderService
-        .patch(orderId, req.body)
+        .patch(orderId, body)
         .then((result) => {
           if (result === null || result === undefined) {
             const response = {
@@ -545,6 +584,25 @@ class OrderController {
 
             return customResponse.error(response, res);
           } else {
+            if (
+              body.some(
+                (e: any) =>
+                  e.op === "replace" &&
+                  e.path === "/status" &&
+                  e.value === "Delivered"
+              )
+            ) {
+              (async () => {
+                await rabbitmqManager.publishMessage(
+                  "eluxe.order.paidOrderCommission",
+                  "paidOrderCommission",
+                  {
+                    order_id: orderId,
+                  }
+                );
+              })();
+            }
+
             const response = {
               status: statusCode.httpOk,
               data: result,

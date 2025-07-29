@@ -1,6 +1,5 @@
 import Order from "./order.model";
 import * as jsonpatch from "fast-json-patch";
-import OrderType from "./order.type";
 
 /**
  * @author Valentin Magde <valentinmagde@gmail.com>
@@ -672,41 +671,33 @@ class OrderService {
   }
 
   /**
-   * Delete a user by id
+   * Delete an order by id
    *
    * @author Valentin Magde <valentinmagde@gmail.com>
-   * @since 2023-04-10
+   * @since 2023-08-17
    *
-   * @param {string} userId the user id
+   * @param {string} orderId the order id
    * @return {Promise<unknown>} the eventual completion or failure
    */
-  // public delete(userId: string): Promise<unknown> {
-  //   return new Promise((resolve, reject) => {
-  //     (async () => {
-  //       try {
-  //         const user: UserType | null = await User.findById(userId).populate(
-  //           "roles"
-  //         );
+  public async delete(orderId: string): Promise<unknown> {
+    return new Promise((resolve, reject) => {
+      (async () => {
+        try {
+          const order = await Order.findById(orderId);
 
-  //         if (user) {
-  //           let roles: Array<RoleType> = user?.roles as Array<RoleType>;
-  //           roles = roles.filter((role) => role.name == "Admin");
+          if (order) {
+            const deletedOrder = await order.deleteOne();
 
-  //           if (roles.length) resolve("isAdmin");
-  //           else {
-  //             const deleteUser = await new User(user).deleteOne();
-
-  //             resolve(deleteUser);
-  //           }
-  //         } else {
-  //           resolve(user);
-  //         }
-  //       } catch (error) {
-  //         reject(error);
-  //       }
-  //     })();
-  //   });
-  // }
+            resolve(deletedOrder);
+          } else {
+            resolve(order);
+          }
+        } catch (error) {
+          reject(error);
+        }
+      })();
+    });
+  }
 }
 
 const orderService = new OrderService();
