@@ -16,6 +16,8 @@ const dev = {
 
   // API GATEWAY URL
   apiGatewayUrl: process.env.API_GATEWAY_URL || "http://localhost:2000",
+  webClientUrl: process.env.WEB_CLIENT_URL || "http://localhost:7000",
+  webBackofficeUrl: process.env.WEB_BACKOFFICE_URL || "http://localhost:5000",
 
   // Redis db
   redisDbPort: process.env.REDIS_DB_PORT || 6379,

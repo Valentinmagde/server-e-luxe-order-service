@@ -5,6 +5,7 @@ import cors from "cors";
 import ExpressConfigModule from "./express";
 import { Application } from "express";
 import DBManager from "./db";
+import config from "../config";
 
 /**
  * @author Valentin Magde <valentinmagde@gmail.com>
@@ -53,9 +54,18 @@ class AppConfig {
    * @return {void}
    */
   public loadAppLevelConfig(): void {
-    this.app.use(bodyParser.json({ limit: '50mb' }));
-    this.app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
-    this.app.use(cors());
+    this.app.use(bodyParser.json({ limit: "50mb" }));
+    this.app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+    this.app.use(
+      cors({
+        origin: [
+          config.webClientUrl,
+          config.webBackofficeUrl,
+          config.apiGatewayUrl,
+        ],
+        credentials: true,
+      })
+    );
   }
 
   /**
