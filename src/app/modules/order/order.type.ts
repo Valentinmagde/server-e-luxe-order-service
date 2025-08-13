@@ -27,6 +27,7 @@ export default interface OrderType {
     paid_at: string;
     is_delivered: boolean;
     delivered_at: string;
+    track_number: string;
     created_at: string;
     updated_at: string;
 }

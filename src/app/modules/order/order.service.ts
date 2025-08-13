@@ -151,7 +151,7 @@ class OrderService {
           const orders = await Order.find(queryObject)
             .select(
               `_id invoice order_number payment_method sub_total total shipping_address user_info discount
-              shipping_cost status created_at updated_at`
+              shipping_cost status track_number created_at updated_at`
             )
             .sort({ updated_at: -1 })
             .skip(skip)

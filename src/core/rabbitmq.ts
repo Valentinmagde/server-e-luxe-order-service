@@ -22,7 +22,7 @@ class RabbitmqManager {
   public async createChannel(): Promise<void> {
     const conn = await amqplib.connect(
       `amqp://${config.rabbitmqDbUser}:${config.rabbitmqDbPassword}@${config.rabbitmqDbHost}`,
-      { clientProperties: { connection_name: "order-service" } }
+      { clientProperties: { connection_name: "payment-service" } }
     );
 
     this.channel = await conn.createChannel();
@@ -73,6 +73,47 @@ class RabbitmqManager {
   }
 
   /**
+   * Consume message
+   *
+   * @author Valentin Magde <valentinmagde@gmail.com>
+   * @since 2023-07-23
+   *
+   * @param {string} exchangeName the routing key
+   * @param {string} routingKey the routing key
+   * @param {string} queueName the queue name
+   * @return {Promise<any>} the eventual completion or failure
+   */
+  public async consumeMessage(
+    exchangeName: string,
+    routingKey: string,
+    queueName: string
+  ): Promise<any> {
+    return new Promise((resolve, reject) => {
+      (async () => {
+        try {
+          if (!this.channel) await this.createChannel();
+
+          await this.channel.assertExchange(exchangeName, "direct");
+
+          const q = await this.channel.assertQueue(queueName);
+
+          await this.channel.bindQueue(q.queue, exchangeName, routingKey);
+
+          this.channel.consume(q.queue, (msg: any) => {
+            const data = JSON.parse(msg.content);
+            console.log(data);
+            this.channel.ack(msg);
+          });
+
+          resolve(q);
+        } catch (error) {
+          reject(error);
+        }
+      })();
+    });
+  }
+
+  /**
    * Connect to rabbitmq
    *
    * @author Valentin Magde <valentinmagde@gmail.com>
@@ -85,7 +126,7 @@ class RabbitmqManager {
       (async () => {
         const conn = await amqplib.connect(
           `amqp://${config.rabbitmqDbUser}:${config.rabbitmqDbPassword}@${config.rabbitmqDbHost}`,
-          { clientProperties: { connection_name: "order-service" } }
+          { clientProperties: { connection_name: "payment-service" } }
         );
 
         resolve(conn);

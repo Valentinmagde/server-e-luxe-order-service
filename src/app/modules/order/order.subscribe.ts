@@ -22,8 +22,8 @@ class OrderSubscribe {
     try {
       const { channel, queue } = await rabbitmqManager.setupQueue(
         "eluxe.payment.updateOrderPaymentStatus",
-        "updateOrderPaymentStatus",
-        "updateOrderPaymentStatusQueue"
+        "updateOrderPaymentStatusQueue",
+        "updateOrderPaymentStatus"
       );
 
       channel.consume(queue, async (msg: any) => {
@@ -41,78 +41,6 @@ class OrderSubscribe {
           channel.ack(msg); // Always acknowledge the message
         }
       });
-
-      // const dbManager = new DBManager();
-
-      // const exchangeName = "eluxe.payment.updateOrderPaymentStatus";
-      // const routingKey = "updateOrderPaymentStatus";
-      // const queueName = "updateOrderPaymentStatusQueue";
-
-      // await rabbitmqManager.createChannel();
-      // const channel = rabbitmqManager.channel;
-      // await channel.assertExchange(exchangeName, "direct");
-      // const q = await channel.assertQueue(queueName);
-      // await channel.bindQueue(q.queue, exchangeName, routingKey);
-
-      // channel.consume(q.queue, (msg: any) => {
-      //   const data: any = JSON.parse(msg.content);
-
-      //   dbManager
-      //     .asyncOnConnect()
-      //     .then((dbConenction) => {
-      //       orderService
-      //         .getOrderById(data.message.order)
-      //         .then((order: any) => {
-      //           if (order !== null && order !== undefined) {
-      //             orderService
-      //               .patch(order._id, [
-      //                 {
-      //                   op: "replace",
-      //                   path: "/is_paid",
-      //                   value: data.message.is_paid,
-      //                 },
-      //                 {
-      //                   op: "replace",
-      //                   path: "/paid_at",
-      //                   value: data.message.paid_at,
-      //                 },
-      //               ])
-      //               .then((result) => {
-      //                 console.log(result);
-
-      //                 // Send confirmation email
-      //                 rabbitmqManager
-      //                   .publishMessage("logExchange", "sendMail", {
-      //                     receivers: order.shipping_address.email,
-      //                     subject: `New order ${order.invoice}`,
-      //                     body: payOrderEmailTemplate(order),
-      //                   })
-      //                   .then((result) => {
-      //                     console.log(result);
-      //                   })
-      //                   .catch((error) => {
-      //                     console.log(error);
-      //                   });
-
-      //                 dbConenction.disconnect();
-      //               })
-      //               .catch((error) => {
-      //                 console.log(error);
-      //                 dbConenction.disconnect();
-      //               });
-      //           }
-      //         })
-      //         .catch((err) => {
-      //           console.log(err);
-      //           dbConenction.disconnect();
-      //         });
-      //     })
-      //     .catch((err) => {
-      //       console.log(err);
-      //     });
-
-      //   channel.ack(msg);
-      // });
     } catch (error) {
       console.error(error);
     }
@@ -135,24 +63,32 @@ class OrderSubscribe {
   ): Promise<void> {
     try {
       const order: any = await orderService.getOrderById(data.message.order);
-
       if (!order) {
         console.error("Order does not exist.");
         return;
       }
 
-      await orderService.patch(order._id, [
-        {
+      const payload: any[] = [];
+
+      if (data.message.is_paid) {
+        payload.push({
           op: "replace",
           path: "/is_paid",
           value: data.message.is_paid,
-        },
-        {
+        });
+      }
+
+      if (data.message.paid_at) {
+        payload.push({
           op: "replace",
           path: "/paid_at",
           value: data.message.paid_at,
-        },
-      ]);
+        });
+      }
+
+      if (payload.length) {
+        await orderService.patch(order._id, payload);
+      }
 
       await rabbitmqManager.publishMessage("logExchange", "sendMail", {
         receivers: order.shipping_address.email,

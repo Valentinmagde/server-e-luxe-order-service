@@ -15,7 +15,7 @@ export const payOrderEmailTemplate = (order: OrderType): any => {
       background-color: #f9f9f9;">
       <div style="max-width: 600px; margin: auto; background-color: #ffffff; padding: 20px; border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-        <h1 style="color: #d51243; text-align: center;">Thank You for Your Purchase!</h1>
+        <h1 style="color: #D4AF37; text-align: center;">Thank You for Your Purchase!</h1>
         <p style="font-size: 16px;">
           Hi ${order.shipping_address.full_name.split(" ")[0]},<br/>
           We are thrilled to inform you that your order has been successfully processed.
@@ -85,7 +85,7 @@ export const payOrderEmailTemplate = (order: OrderType): any => {
             </tr>-->
           </tfoot>
         </table>
-        <h2 style="margin-top: 20px; color: #d51243;">Shipping Address</h2>
+        <h2 style="margin-top: 20px; color: #D4AF37;">Shipping Address</h2>
         <p style="line-height: 1.5; font-size: 16px;">
           ${order.shipping_address.full_name}<br/>
           ${order.shipping_address.address.street}, ${

@@ -62,6 +62,7 @@ const orderSchema = new mongoose.Schema(
     sub_total: { type: Number, required: true },
     shipping_cost: { type: Number, required: true },
     total: { type: Number, required: true },
+    track_number: { type: String, required: false },
     status: {
       type: String,
       default: "Pending",
