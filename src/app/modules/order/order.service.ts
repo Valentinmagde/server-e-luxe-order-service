@@ -46,9 +46,10 @@ class OrderService {
     return new Promise((resolve, reject) => {
       (async () => {
         try {
-          const order = await Order.find({ user: userId }).populate(
-            "shipping_method"
-          );
+          const order = await Order.find({ user: userId })
+            .sort({ updated_at: -1 })
+            .sort({ updated_at: -1 })
+            .populate("shipping_method");
 
           resolve(order);
         } catch (error) {
@@ -79,6 +80,7 @@ class OrderService {
             limit,
             method,
             endDate,
+            isPaid,
             // download,
             // sellFrom,
             startDate,
@@ -138,6 +140,11 @@ class OrderService {
               $lt: endDate,
             };
           }
+
+          if (isPaid == "true" || isPaid == "false") {
+            queryObject.is_paid = isPaid;
+          }
+
           if (method) {
             queryObject.payment_method = { $regex: `${method}`, $options: "i" };
           }
@@ -151,7 +158,7 @@ class OrderService {
           const orders = await Order.find(queryObject)
             .select(
               `_id invoice order_number payment_method sub_total total shipping_address user_info discount
-              shipping_cost status track_number created_at updated_at`
+              shipping_cost status track_number is_paid created_at updated_at`
             )
             .sort({ updated_at: -1 })
             .skip(skip)
