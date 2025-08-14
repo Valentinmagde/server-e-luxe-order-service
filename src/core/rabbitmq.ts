@@ -126,7 +126,7 @@ class RabbitmqManager {
       (async () => {
         const conn = await amqplib.connect(
           `amqp://${config.rabbitmqDbUser}:${config.rabbitmqDbPassword}@${config.rabbitmqDbHost}`,
-          { clientProperties: { connection_name: "payment-service" } }
+          { clientProperties: { connection_name: "order-service" } }
         );
 
         resolve(conn);
