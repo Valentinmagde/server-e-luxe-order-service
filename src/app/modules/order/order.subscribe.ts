@@ -90,7 +90,7 @@ class OrderSubscribe {
         await orderService.patch(order._id, payload);
       }
 
-      await rabbitmqManager.publishMessage("logExchange", "sendMail", {
+      await rabbitmqManager.publishMessage("eluxe.email.sendMail", "sendMail", {
         receivers: order.shipping_address.email,
         subject: `New order ${order.invoice}`,
         body: payOrderEmailTemplate(order),
