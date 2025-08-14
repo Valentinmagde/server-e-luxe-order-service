@@ -22,7 +22,7 @@ class RabbitmqManager {
   public async createChannel(): Promise<void> {
     const conn = await amqplib.connect(
       `amqp://${config.rabbitmqDbUser}:${config.rabbitmqDbPassword}@${config.rabbitmqDbHost}`,
-      { clientProperties: { connection_name: "payment-service" } }
+      { clientProperties: { connection_name: "order-service" } }
     );
 
     this.channel = await conn.createChannel();
