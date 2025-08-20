@@ -5,7 +5,7 @@ name: Release Server E-LUXE Order Service
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ "main" ]
+    branches: [ "develop" ]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -18,7 +18,7 @@ jobs:
     steps:
     - name: 'Create env file'
       run: |
-        echo "${{ secrets.DOT_ENV_PRODUCTION }}" > .env
+        echo "${{ secrets.DOT_ENV_DEVELOPMENT }}" > .env
   
     - name: Copy .env file to server using SCP
       uses: appleboy/scp-action@master
@@ -27,7 +27,7 @@ jobs:
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.PRIVATE_KEY }}
         source: ".env"
-        target: ${{ secrets.SERVER_PATH }}
+        target: ${{ secrets.DEV_SERVER_PATH }}
   
     - name: Deploy using ssh
       uses: appleboy/ssh-action@master
@@ -37,10 +37,10 @@ jobs:
         key: ${{ secrets.PRIVATE_KEY }}
         port: 22
         script: |
-          cd /var/www/servers/server-e-luxe/server-e-luxe-order-service
+          cd /var/www/servers/server-e-luxe-dev/server-e-luxe-order-service
           # git reset --hard HEAD
           git clean -fd
           git pull origin main
           npm install
           npm run build
-          pm2 restart e-luxe-order-service
+          pm2 restart e-luxe-order-service-development
