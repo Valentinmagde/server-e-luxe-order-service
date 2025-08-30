@@ -92,7 +92,7 @@ class OrderSubscribe {
 
       await rabbitmqManager.publishMessage("eluxe.email.sendMail", "sendMail", {
         receivers: order.shipping_address.email,
-        subject: `New order ${order.invoice}`,
+        subject: `Order Confirmation – e-luxe.fr - #${order.invoice}`,
         body: payOrderEmailTemplate(order),
       });
     } catch (error) {
