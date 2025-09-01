@@ -66,3 +66,6 @@ Then use following command to build Docker containers:
 docker-compose up -d --build
 ```
 See Dockerfile and docker-compose.yml for more details.
+
+
+<!-- Security scan triggered at 2025-09-01 22:03:20 -->
