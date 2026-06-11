@@ -7,7 +7,7 @@
   "scripts": {
     "start": "nodemon --watch src/** --ext ts,json --ignore src/**/*.spec.ts --exec ts-node --files server.ts",
     "start-dev": "NODE_ENV=development nodemon --watch src/** --ext ts,json --ignore src/**/*.spec.ts --exec ts-node --files server.ts",
-    "start-prod": "NODE_ENV=production nodemon --watch src/** --ext ts,json --ignore src/**/*.spec.ts --exec ts-node --files server.ts",
+    "start-prod": "NODE_ENV=production doppler run -- nodemon --watch src/** --ext ts,json --ignore src/**/*.spec.ts --exec ts-node --files server.ts",
     "lint": "eslint .",
     "test": "jest",
     "build": "tsc --build --force tsconfig.json && cp -r src/resources build/src/"

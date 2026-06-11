@@ -54,18 +54,25 @@ class AppConfig {
    * @return {void}
    */
   public loadAppLevelConfig(): void {
+    const allowedOrigins = [config.webClientUrl, config.webBackofficeUrl, config.apiGatewayUrl];
+    const corsOptions: cors.CorsOptions = {
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        const isLocalhost = /^http:\/\/localhost(:\d+)?$/.test(origin);
+        if (isLocalhost || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error(`Origin ${origin} not allowed`));
+        }
+      },
+      credentials: true,
+      methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    };
+    this.app.options('*', cors(corsOptions));
+    this.app.use(cors(corsOptions));
     this.app.use(bodyParser.json({ limit: "50mb" }));
     this.app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
-    this.app.use(
-      cors({
-        origin: [
-          config.webClientUrl,
-          config.webBackofficeUrl,
-          config.apiGatewayUrl,
-        ],
-        credentials: true,
-      })
-    );
   }
 
   /**
