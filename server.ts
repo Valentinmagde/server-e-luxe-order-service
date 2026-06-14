@@ -8,6 +8,7 @@ import errorNumbers from "./src/app/utils/error-numbers.util";
 import config from "./src/config";
 import AppConfig from "./src/core/app";
 import Subscribes from "./src/app/subscribes/subscribes";
+import DBManager from "./src/core/db";
 
 /**
  * @author Valentin Magde <valentinmagde@gmail.com>
@@ -75,10 +76,9 @@ class Server {
    *
    * @returns {void}
    */
-  public startTheServer(): void {
+  public async startTheServer(): Promise<void> {
     this.appConfig();
     this.includeRoutes();
-    this.includeSubscribes();
 
     // Default error-handling middleware
     this.app.use(
@@ -103,6 +103,15 @@ class Server {
     this.http.listen(port, host, () => {
       console.log(`Listening on http://${host}:${port}`);
     });
+
+    // Connect to MongoDB before starting crons so background jobs can query the DB
+    try {
+      await new DBManager().asyncOnConnect();
+      console.log("[Server] MongoDB connected — starting background jobs");
+      this.includeSubscribes();
+    } catch (err) {
+      console.error("[Server] MongoDB connection failed — background jobs not started:", err);
+    }
   }
 }
 

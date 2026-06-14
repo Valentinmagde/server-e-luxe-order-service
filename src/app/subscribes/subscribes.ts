@@ -1,4 +1,5 @@
 import orderSubscribe from "../modules/order/order.subscribe";
+import { startLdTrackingCron } from "../modules/order/ld-tracking.cron";
 
 /**
  * @author Valentin Magde <valentinmagde@gmail.com>
@@ -19,6 +20,7 @@ class Subscribes {
   public appSubscribes(): void {
     // Includes all subscribes
     orderSubscribe.updateOrderPaymentStatus();
+    startLdTrackingCron();
   }
 
   /**

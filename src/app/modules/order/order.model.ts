@@ -10,6 +10,8 @@ const orderSchema = new mongoose.Schema(
         price: { type: Number, required: true },
         purchase_cost: { type: Number, required: false },
         _id: { type: mongoose.Schema.Types.ObjectId, required: true },
+        ld_external_id: { type: String, required: false },
+        ld_size: { type: String, required: false },
       },
     ],
     shipping_address: {
@@ -63,6 +65,8 @@ const orderSchema = new mongoose.Schema(
     shipping_cost: { type: Number, required: true },
     total: { type: Number, required: true },
     track_number: { type: String, required: false },
+    ld_order_id: { type: Number, required: false },
+    ld_tracking_number: { type: String, required: false },
     status: {
       type: String,
       default: "Pending",

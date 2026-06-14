@@ -774,6 +774,9 @@ class OrderRoutes {
              *
              */
             router.get("/dashboard-recent-order", orderController.getOrders);
+
+            router.get("/crons", orderController.getCronStatus.bind(orderController));
+            router.post("/crons/:cronId/run", orderController.runCronNow.bind(orderController));
           })
         );
 
