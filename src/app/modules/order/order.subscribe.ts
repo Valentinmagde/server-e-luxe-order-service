@@ -1,4 +1,5 @@
 import { payOrderEmailTemplate } from "../../../resources/email/order-receive";
+import { generateInvoicePdf } from "../../../resources/pdf/invoice.generator";
 import DBManager from "../../../core/db";
 import rabbitmqManager from "../../../core/rabbitmq";
 import orderService from "./order.service";
@@ -90,10 +91,24 @@ class OrderSubscribe {
         await orderService.patch(order._id, payload);
       }
 
+      let attachments: any[] = [];
+      try {
+        const pdfBuffer = await generateInvoicePdf(order);
+        attachments = [{
+          filename: `facture-${order.invoice || order._id}.pdf`,
+          content: pdfBuffer.toString("base64"),
+          encoding: "base64",
+          contentType: "application/pdf",
+        }];
+      } catch (pdfErr) {
+        console.error("[OrderSubscribe] PDF generation failed:", pdfErr);
+      }
+
       await rabbitmqManager.publishMessage("eluxe.email.sendMail", "sendMail", {
         receivers: order.shipping_address.email,
         subject: `Order Confirmation – e-luxe.fr - #${order.invoice}`,
         body: payOrderEmailTemplate(order),
+        attachments,
       });
     } catch (error) {
       console.error("Error handling Update Order Payment Status:", error);

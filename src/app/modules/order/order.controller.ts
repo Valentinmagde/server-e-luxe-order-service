@@ -9,6 +9,7 @@ import { checkObjectId, generateInvoiceNumber } from "../../utils/helpers.util";
 import orderService from "./order.service";
 import orderCounterService from "../order-counter/order-counter.service";
 import rabbitmqManager from "../../../core/rabbitmq";
+import { getTrackingCronState, runTrackingNow } from "./ld-tracking.cron";
 
 /**
  * @author Valentin Magde <valentinmagde@gmail.com>
@@ -534,6 +535,20 @@ class OrderController {
    *
    * @return {Promise<void>} the eventual completion or failure
    */
+  public async getCronStatus(_req: Request, res: Response): Promise<void> {
+    const response = { status: statusCode.httpOk, data: [getTrackingCronState()] };
+    return customResponse.success(response, res);
+  }
+
+  public async runCronNow(req: Request, res: Response): Promise<void> {
+    const { cronId } = req.params;
+    if (cronId !== "ld-tracking") {
+      return customResponse.error({ status: statusCode.httpNotFound, errNo: errorNumbers.resourceNotFound, errMsg: "Unknown cron" }, res);
+    }
+    runTrackingNow().catch((err) => console.error("[CronController] runTrackingNow error:", err));
+    return customResponse.success({ status: statusCode.httpOk, data: { message: "Cron triggered" } }, res);
+  }
+
   // public async delete(req: Request, res: Response): Promise<void> {
   //   const userid = req.params.userId;
 

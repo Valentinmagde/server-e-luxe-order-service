@@ -62,7 +62,7 @@ class RabbitmqManager {
             Buffer.from(JSON.stringify(logDetails))
           );
           console.log(
-            `The message ${message} is send to exchange ${exchangeName}`
+            `Message published to exchange ${exchangeName} (${routingKey})`
           );
           resolve(publishResult);
         } catch (error) {

@@ -1,5 +1,6 @@
 import Order from "./order.model";
 import * as jsonpatch from "fast-json-patch";
+import ldOrderService from "./ld-order.service";
 
 /**
  * @author Valentin Magde <valentinmagde@gmail.com>
@@ -631,6 +632,18 @@ class OrderService {
           const order = new Order(data);
 
           const createdOrder = await order.save();
+
+          // Fire-and-forget: submit LD items to Luxury Distribution
+          ldOrderService.submitOrder(createdOrder).then(async (ldOrderId) => {
+            if (ldOrderId) {
+              await Order.updateOne(
+                { _id: createdOrder._id },
+                { $set: { ld_order_id: ldOrderId } }
+              );
+            }
+          }).catch((err) => {
+            console.error("[OrderService] LD order submission error:", err);
+          });
 
           resolve(createdOrder);
         } catch (error) {
