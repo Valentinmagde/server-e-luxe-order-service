@@ -4,8 +4,9 @@ const LD_PUBLIC_KEY = process.env.LD_PUBLIC_KEY || "";
 const LD_USERNAME = process.env.LD_USERNAME || "";
 const LD_IDENTIFIER = process.env.LD_IDENTIFIER || "";
 
-const ORDER_ENDPOINT =
-  process.env.NODE_ENV === "production" ? "/v1/order" : "/v1/test-order";
+// "/v1/test-order" est, malgré son nom, le seul endpoint de création de commande
+// documenté dans l'API Luxury Distribution ("/v1/order" n'existe pas — renvoie 404).
+const ORDER_ENDPOINT = "/v1/test-order";
 
 let cachedToken: string | null = null;
 let tokenExpiry: number | null = null;
@@ -93,9 +94,10 @@ class LdOrderService {
         return null;
       }
 
-      // Test endpoint (/v1/test-order) returns 200 with empty body — treat as success
+      // Defensive guard: an empty 200 body shouldn't happen per LD's docs, but avoid
+      // crashing on JSON.parse("") if it ever does.
       if (!rawBody) {
-        console.log(`[LdOrderService] submitOrder accepted (${res.status}) — no order_id in test mode`);
+        console.log(`[LdOrderService] submitOrder accepted (${res.status}) but response body was empty`);
         return null;
       }
 
