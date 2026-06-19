@@ -4,9 +4,8 @@ const LD_PUBLIC_KEY = process.env.LD_PUBLIC_KEY || "";
 const LD_USERNAME = process.env.LD_USERNAME || "";
 const LD_IDENTIFIER = process.env.LD_IDENTIFIER || "";
 
-// "/v1/test-order" est, malgré son nom, le seul endpoint de création de commande
-// documenté dans l'API Luxury Distribution ("/v1/order" n'existe pas — renvoie 404).
-const ORDER_ENDPOINT = "/v1/test-order";
+const ORDER_ENDPOINT =
+  process.env.NODE_ENV === "production" ? "/v1/order" : "/v1/test-order";
 
 let cachedToken: string | null = null;
 let tokenExpiry: number | null = null;
