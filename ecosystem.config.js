@@ -1,10 +1,12 @@
+require('dotenv/config');
+
 module.exports = {
   apps: [
     {
       name: `e-luxe-order-service-${process.env.NODE_ENV || "development"}`,
       script: "build/server.js",
       env: {
-        NODE_ENV: "development",
+        NODE_ENV: process.env.NODE_ENV || "development",
       },
       env_test: {
         NODE_ENV: "test",

@@ -93,9 +93,10 @@ class LdOrderService {
         return null;
       }
 
-      // Test endpoint (/v1/test-order) returns 200 with empty body — treat as success
+      // Defensive guard: an empty 200 body shouldn't happen per LD's docs, but avoid
+      // crashing on JSON.parse("") if it ever does.
       if (!rawBody) {
-        console.log(`[LdOrderService] submitOrder accepted (${res.status}) — no order_id in test mode`);
+        console.log(`[LdOrderService] submitOrder accepted (${res.status}) but response body was empty`);
         return null;
       }
 
