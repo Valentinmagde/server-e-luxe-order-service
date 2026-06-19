@@ -35,6 +35,40 @@ class OrderService {
   }
 
   /**
+   * Resubmit an order to Luxury Distribution (manual retry).
+   * Used when the automatic fire-and-forget submission at order creation
+   * failed or was sent to the wrong LD environment.
+   *
+   * @author Valentin Magde <valentinmagde@gmail.com>
+   * @since 2026-06-20
+   *
+   * @param {string} orderId the order id
+   * @return {Promise<{ ld_order_id: number } | null>} the new LD order id, or null if no LD items / failure
+   */
+  public resubmitToLd(orderId: string): Promise<{ ld_order_id: number } | null> {
+    return new Promise((resolve, reject) => {
+      (async () => {
+        try {
+          const order = await Order.findById(orderId);
+          if (!order) return resolve(null);
+
+          const ldOrderId = await ldOrderService.submitOrder(order);
+          if (!ldOrderId) return resolve(null);
+
+          await Order.updateOne(
+            { _id: order._id },
+            { $set: { ld_order_id: ldOrderId } }
+          );
+
+          resolve({ ld_order_id: ldOrderId });
+        } catch (error) {
+          reject(error);
+        }
+      })();
+    });
+  }
+
+  /**
    * Get orders details by user
    *
    * @author Valentin Magde <valentinmagde@gmail.com>

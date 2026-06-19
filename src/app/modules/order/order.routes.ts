@@ -855,6 +855,11 @@ class OrderRoutes {
              */
             router.get("/:orderId", orderController.getOrderById);
 
+            router.post(
+              "/:orderId/resubmit-ld",
+              orderController.resubmitToLd.bind(orderController)
+            );
+
             /**
              * @swagger
              * /v1/{lang}/order/{orderId}:

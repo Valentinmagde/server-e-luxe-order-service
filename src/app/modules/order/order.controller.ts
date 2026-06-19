@@ -540,6 +540,55 @@ class OrderController {
     return customResponse.success(response, res);
   }
 
+  /**
+   * Manually resubmit an order to Luxury Distribution.
+   *
+   * @author Valentin Magde <valentinmagde@gmail.com>
+   * @since 2026-06-20
+   *
+   * @param {Request} req the http request
+   * @param {Response} res the http response
+   *
+   * @return {Promise<void>} the eventual completion or failure
+   */
+  public async resubmitToLd(req: Request, res: Response): Promise<void> {
+    const orderId = req.params.orderId;
+    if (!checkObjectId(orderId)) {
+      return customResponse.error(
+        {
+          status: statusCode.httpBadRequest,
+          errNo: errorNumbers.validator,
+          errMsg: i18n.__("order.orderNotFound"),
+        },
+        res
+      );
+    }
+
+    try {
+      const result = await orderService.resubmitToLd(orderId);
+      if (!result) {
+        return customResponse.error(
+          {
+            status: statusCode.httpBadRequest,
+            errNo: errorNumbers.genericError,
+            errMsg: "Resubmission failed: no LD item on this order, or Luxury Distribution rejected the request (see server logs).",
+          },
+          res
+        );
+      }
+      return customResponse.success({ status: statusCode.httpOk, data: result }, res);
+    } catch (error: any) {
+      return customResponse.error(
+        {
+          status: error?.status || statusCode.httpInternalServerError,
+          errNo: errorNumbers.genericError,
+          errMsg: error?.message || error,
+        },
+        res
+      );
+    }
+  }
+
   public async runCronNow(req: Request, res: Response): Promise<void> {
     const { cronId } = req.params;
     if (cronId !== "ld-tracking") {
