@@ -160,16 +160,25 @@ export async function generateInvoicePdf(order: any): Promise<Buffer> {
 
     let y = tTop + 30;
     items.forEach((item: any) => {
-      const name      = item.title?.["fr"] || item.title?.["en"] || "—";
-      const unitPrice = Number(item.price) || 0;
-      const lineTotal = unitPrice * (item.qty || 1);
+      const name         = item.title?.["fr"] || item.title?.["en"] || "—";
+      const unitPrice     = Number(item.price) || 0;
+      const originalPrice = Number(item.original_price) || 0;
+      const hasDiscount   = originalPrice > unitPrice;
+      const lineTotal     = unitPrice * (item.qty || 1);
 
       doc.fillColor(DARK).font("Helvetica").fontSize(10);
       doc.text(name,                  cTitle, y, { width: 280, ellipsis: true });
       doc.text(String(item.qty || 1), cQty,   y, { width: cQtyW, align: "center" });
-      doc.text(EUR(unitPrice),        cPrice, y, { width: cPrW,  align: "right"  });
+
+      if (hasDiscount) {
+        doc.fillColor(GRAY).font("Helvetica").fontSize(8);
+        doc.text(EUR(originalPrice), cPrice, y - 9, { width: cPrW, align: "right", strike: true } as any);
+        doc.fillColor(DARK).font("Helvetica").fontSize(10);
+      }
+      doc.text(EUR(unitPrice), cPrice, y, { width: cPrW, align: "right" });
+
       doc.fillColor(GOLD).font("Helvetica-Bold");
-      doc.text(EUR(lineTotal),        cAmt,   y, { width: cAmtW, align: "right"  });
+      doc.text(EUR(lineTotal), cAmt, y, { width: cAmtW, align: "right" });
 
       y += 22;
     });

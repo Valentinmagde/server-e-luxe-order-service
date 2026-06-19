@@ -659,6 +659,20 @@ class OrderService {
     return new Promise((resolve, reject) => {
       (async () => {
         try {
+          // La remise affichee sur la facture doit refleter la promo reelle
+          // (souvent definie au niveau variant), pas seulement un eventuel
+          // discount de coupon deja present dans data.discount.
+          const itemsDiscount = (data.order_items || []).reduce(
+            (sum: number, item: any) => {
+              const original = Number(item.original_price || 0);
+              const price = Number(item.price || 0);
+              const qty = Number(item.qty || 1);
+              return original > price ? sum + (original - price) * qty : sum;
+            },
+            0
+          );
+          data.discount = Number(data.discount || 0) + itemsDiscount;
+
           const order = new Order(data);
 
           const createdOrder = await order.save();
