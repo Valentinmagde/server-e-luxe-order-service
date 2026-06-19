@@ -297,12 +297,9 @@ class OrderService {
             },
             {
               $match: {
-                $or: [{ status: { $regex: "Delivered", $options: "i" } }],
+                is_paid: true,
                 year: { $eq: new Date().getFullYear() },
                 month: { $eq: new Date().getMonth() + 1 },
-                // $expr: {
-                //   $eq: [{ $month: "$updatedAt" }, { $month: new Date() }],
-                // },
               },
             },
             {
@@ -347,8 +344,7 @@ class OrderService {
             },
             {
               $match: {
-                $or: [{ status: { $regex: "Delivered", $options: "i" } }],
-
+                is_paid: true,
                 updated_at: { $gt: lastMonthStartDate, $lt: lastMonthEndDate },
               },
             },
@@ -384,7 +380,7 @@ class OrderService {
           // order list last 10 days
           const orderFilteringData = await Order.find(
             {
-              $or: [{ status: { $regex: `Delivered`, $options: "i" } }],
+              is_paid: true,
               updated_at: {
                 $gte: week,
               },
