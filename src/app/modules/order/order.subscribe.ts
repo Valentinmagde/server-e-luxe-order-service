@@ -1,4 +1,4 @@
-import { payOrderEmailTemplate } from "../../../resources/email/order-receive";
+import { payOrderEmailTemplate, newOrderNotificationEmailTemplate } from "../../../resources/email/order-receive";
 import { generateInvoicePdf } from "../../../resources/pdf/invoice.generator";
 import DBManager from "../../../core/db";
 import rabbitmqManager from "../../../core/rabbitmq";
@@ -109,6 +109,16 @@ class OrderSubscribe {
         subject: `Order Confirmation – e-luxe.fr - #${order.invoice}`,
         body: payOrderEmailTemplate(order),
         attachments,
+      });
+
+      // Internal notification: let support/staff know a new order was paid.
+      await rabbitmqManager.publishMessage("eluxe.email.sendMail", "sendMail", {
+        receivers: process.env.ORDER_NOTIFICATION_EMAIL || "support@e-luxe.fr",
+        subject: `New paid order – e-luxe.fr - #${order.invoice}`,
+        body: newOrderNotificationEmailTemplate(order),
+        attachments,
+      }).catch((err) => {
+        console.error("[OrderSubscribe] Internal order notification email error:", err);
       });
     } catch (error) {
       console.error("Error handling Update Order Payment Status:", error);

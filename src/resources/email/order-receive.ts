@@ -99,3 +99,82 @@ export const payOrderEmailTemplate = (order: OrderType): string => {
   </div>
   `;
 };
+
+/**
+ * Internal notification email template, sent to the store's support/staff
+ * address whenever a customer order is paid.
+ *
+ * @author Valentin Magde <valentinmagde@gmail.com>
+ * @since 2026-06-21
+ *
+ * @param {OrderType} order The order data.
+ * @returns {string} the email template.
+ */
+export const newOrderNotificationEmailTemplate = (order: OrderType): string => {
+  return `
+  <div style="font-family: Arial, sans-serif; background-color:#f6f9fc; padding:40px;">
+    <div style="max-width:600px; margin:auto; background:#fff; border-radius:8px; overflow:hidden;
+      box-shadow:0 2px 6px rgba(0,0,0,0.05);">
+
+      <!-- Header -->
+      <div style="background:#1a1a1a; padding:20px; text-align:center; color:white;">
+        <h1 style="margin:0; font-size:22px; letter-spacing:0.5px;">New Paid Order</h1>
+        <p style="margin:5px 0 0; font-size:14px;">#${order.invoice}</p>
+      </div>
+
+      <!-- Customer -->
+      <div style="padding:20px;">
+        <p style="font-size:14px; margin:0 0 10px;">
+          <b>${order.shipping_address.full_name}</b><br/>
+          ${order.shipping_address.email}<br/>
+          ${order.shipping_address.phone}
+        </p>
+        <p style="font-size:14px; margin:0;">
+          Payment method: <b>${order.payment_method}</b><br/>
+          Total: <b>$${order.total_price.toFixed(2)}</b>
+        </p>
+      </div>
+
+      <!-- Order Items -->
+      <div style="padding:0 20px;">
+        <table style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr style="border-bottom:1px solid #eee;">
+              <th align="left" style="padding:10px 0; font-size:14px;">Product</th>
+              <th align="center" style="padding:10px 0; font-size:14px;">Qty</th>
+              <th align="right" style="padding:10px 0; font-size:14px;">Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${order.order_items.map(item => `
+              <tr style="border-bottom:1px solid #f0f0f0;">
+                <td style="padding:10px 0; font-size:14px;">${item.title["en"]}</td>
+                <td align="center" style="font-size:14px;">${item.qty}</td>
+                <td align="right" style="font-size:14px;">$${item.price.toFixed(2)}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Shipping Info -->
+      <div style="padding:20px;">
+        <h3 style="margin:0 0 10px; color:#1a1a1a;">Shipping Address</h3>
+        <p style="font-size:14px; margin:0; line-height:1.5;">
+          ${order.shipping_address.address.street}, ${order.shipping_address.address.apartment || ""}<br/>
+          ${order.shipping_address.city}, ${order.shipping_address.country}, ${order.shipping_address.postal_code}
+        </p>
+      </div>
+
+      <!-- CTA -->
+      <div style="text-align:center; padding:20px;">
+        <a href="${process.env.WEB_BACKOFFICE_URL}/order/${order?._id}"
+          style="display:inline-block; background:#1a1a1a; color:white; padding:12px 24px;
+          border-radius:5px; text-decoration:none; font-size:14px; font-weight:bold;">
+          View in backoffice
+        </a>
+      </div>
+    </div>
+  </div>
+  `;
+};
