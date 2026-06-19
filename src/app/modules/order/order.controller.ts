@@ -566,17 +566,49 @@ class OrderController {
 
     try {
       const result = await orderService.resubmitToLd(orderId);
+
       if (!result) {
         return customResponse.error(
           {
-            status: statusCode.httpBadRequest,
-            errNo: errorNumbers.genericError,
-            errMsg: "Resubmission failed: no LD item on this order, or Luxury Distribution rejected the request (see server logs).",
+            status: statusCode.httpNotFound,
+            errNo: errorNumbers.resourceNotFound,
+            errMsg: i18n.__("order.orderNotFound"),
           },
           res
         );
       }
-      return customResponse.success({ status: statusCode.httpOk, data: result }, res);
+
+      if (!result.ok) {
+        const reasonMessages: Record<string, string> = {
+          no_items: "This order has no Luxury Distribution item to submit.",
+          rejected: `Luxury Distribution rejected the request: ${result.detail || ""}`,
+          invalid_response: "Luxury Distribution returned an unexpected response.",
+          network_error: `Could not reach Luxury Distribution: ${result.detail || ""}`,
+        };
+        return customResponse.error(
+          {
+            status: statusCode.httpBadRequest,
+            errNo: errorNumbers.genericError,
+            errMsg: reasonMessages[result.reason] || "Resubmission failed.",
+          },
+          res
+        );
+      }
+
+      if (result.sandbox) {
+        return customResponse.success(
+          {
+            status: statusCode.httpOk,
+            data: { sandbox: true, ld_order_id: null },
+          },
+          res
+        );
+      }
+
+      return customResponse.success(
+        { status: statusCode.httpOk, data: { sandbox: false, ld_order_id: result.order_id } },
+        res
+      );
     } catch (error: any) {
       return customResponse.error(
         {

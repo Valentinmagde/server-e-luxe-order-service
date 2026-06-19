@@ -10,6 +10,11 @@ const ORDER_ENDPOINT =
 let cachedToken: string | null = null;
 let tokenExpiry: number | null = null;
 
+export type LdSubmitResult =
+  | { ok: true; order_id: number; sandbox: false }
+  | { ok: true; order_id: null; sandbox: true } // accepted by LD's test endpoint (dev), no real order_id
+  | { ok: false; reason: "no_items" | "rejected" | "invalid_response" | "network_error"; detail?: string };
+
 class LdOrderService {
   private async getToken(): Promise<string> {
     if (cachedToken && tokenExpiry && Date.now() < tokenExpiry) {
@@ -40,14 +45,20 @@ class LdOrderService {
 
   /**
    * Submit an e-luxe order to Luxury Distribution.
-   * Returns the LD order_id on success, or null if no LD items or on failure.
+   *
+   * Note: in non-production environments this hits LD's "/v1/test-order"
+   * sandbox endpoint, which accepts the request but returns an empty body
+   * (no real order_id) — that case is reported as `{ ok: true, sandbox: true }`,
+   * distinct from a genuine failure.
    */
-  public async submitOrder(order: any): Promise<number | null> {
+  public async submitOrder(order: any): Promise<LdSubmitResult> {
     const ldItems = (order.order_items || []).filter(
       (item: any) => item.ld_external_id && item.ld_size
     );
 
-    if (ldItems.length === 0) return null;
+    if (ldItems.length === 0) {
+      return { ok: false, reason: "no_items" };
+    }
 
     const addr = order.shipping_address;
     const payload = {
@@ -90,14 +101,14 @@ class LdOrderService {
 
       if (!res.ok) {
         console.error(`[LdOrderService] submitOrder failed (${res.status}): ${rawBody}`);
-        return null;
+        return { ok: false, reason: "rejected", detail: `HTTP ${res.status}: ${rawBody}` };
       }
 
-      // Defensive guard: an empty 200 body shouldn't happen per LD's docs, but avoid
-      // crashing on JSON.parse("") if it ever does.
+      // "/v1/test-order" (used outside production) accepts the request but
+      // replies with an empty body — no real order_id to report.
       if (!rawBody) {
-        console.log(`[LdOrderService] submitOrder accepted (${res.status}) but response body was empty`);
-        return null;
+        console.log(`[LdOrderService] submitOrder accepted (${res.status}) on sandbox endpoint — no order_id`);
+        return { ok: true, order_id: null, sandbox: true };
       }
 
       let data: any = null;
@@ -105,12 +116,17 @@ class LdOrderService {
         data = JSON.parse(rawBody);
       } catch {
         console.error("[LdOrderService] submitOrder: invalid JSON response:", rawBody);
-        return null;
+        return { ok: false, reason: "invalid_response", detail: rawBody };
       }
-      return data?.data?.order_id ?? null;
-    } catch (err) {
+
+      const orderId = data?.data?.order_id;
+      if (!orderId) {
+        return { ok: true, order_id: null, sandbox: true };
+      }
+      return { ok: true, order_id: orderId, sandbox: false };
+    } catch (err: any) {
       console.error("[LdOrderService] submitOrder error:", err);
-      return null;
+      return { ok: false, reason: "network_error", detail: err?.message || String(err) };
     }
   }
 

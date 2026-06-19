@@ -1,6 +1,6 @@
 import Order from "./order.model";
 import * as jsonpatch from "fast-json-patch";
-import ldOrderService from "./ld-order.service";
+import ldOrderService, { LdSubmitResult } from "./ld-order.service";
 
 /**
  * @author Valentin Magde <valentinmagde@gmail.com>
@@ -43,24 +43,24 @@ class OrderService {
    * @since 2026-06-20
    *
    * @param {string} orderId the order id
-   * @return {Promise<{ ld_order_id: number } | null>} the new LD order id, or null if no LD items / failure
+   * @return {Promise<LdSubmitResult | null>} the LD submission result, or null if the order doesn't exist
    */
-  public resubmitToLd(orderId: string): Promise<{ ld_order_id: number } | null> {
+  public resubmitToLd(orderId: string): Promise<LdSubmitResult | null> {
     return new Promise((resolve, reject) => {
       (async () => {
         try {
           const order = await Order.findById(orderId);
           if (!order) return resolve(null);
 
-          const ldOrderId = await ldOrderService.submitOrder(order);
-          if (!ldOrderId) return resolve(null);
+          const result = await ldOrderService.submitOrder(order);
+          if (result.ok && result.order_id) {
+            await Order.updateOne(
+              { _id: order._id },
+              { $set: { ld_order_id: result.order_id } }
+            );
+          }
 
-          await Order.updateOne(
-            { _id: order._id },
-            { $set: { ld_order_id: ldOrderId } }
-          );
-
-          resolve({ ld_order_id: ldOrderId });
+          resolve(result);
         } catch (error) {
           reject(error);
         }
@@ -668,12 +668,14 @@ class OrderService {
           const createdOrder = await order.save();
 
           // Fire-and-forget: submit LD items to Luxury Distribution
-          ldOrderService.submitOrder(createdOrder).then(async (ldOrderId) => {
-            if (ldOrderId) {
+          ldOrderService.submitOrder(createdOrder).then(async (result) => {
+            if (result.ok && result.order_id) {
               await Order.updateOne(
                 { _id: createdOrder._id },
-                { $set: { ld_order_id: ldOrderId } }
+                { $set: { ld_order_id: result.order_id } }
               );
+            } else if (!result.ok) {
+              console.error(`[OrderService] LD order submission failed (${result.reason}): ${result.detail || ""}`);
             }
           }).catch((err) => {
             console.error("[OrderService] LD order submission error:", err);
