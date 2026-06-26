@@ -112,14 +112,21 @@ class OrderSubscribe {
       });
 
       // Internal notification: let support/staff know a new order was paid.
-      await rabbitmqManager.publishMessage("eluxe.email.sendMail", "sendMail", {
-        receivers: process.env.ORDER_NOTIFICATION_EMAIL || "support@e-luxe.fr",
-        subject: `New paid order – e-luxe.fr - #${order.invoice}`,
-        body: newOrderNotificationEmailTemplate(order),
-        attachments,
-      }).catch((err) => {
-        console.error("[OrderSubscribe] Internal order notification email error:", err);
-      });
+      // Skipped on local dev so test orders don't spam the support inbox.
+      const isLocalEnv =
+        process.env.NODE_ENV !== "production" &&
+        process.env.NODE_ENV !== "development";
+
+      if (!isLocalEnv) {
+        await rabbitmqManager.publishMessage("eluxe.email.sendMail", "sendMail", {
+          receivers: process.env.ORDER_NOTIFICATION_EMAIL || "support@e-luxe.fr",
+          subject: `New paid order – e-luxe.fr - #${order.invoice}`,
+          body: newOrderNotificationEmailTemplate(order),
+          attachments,
+        }).catch((err) => {
+          console.error("[OrderSubscribe] Internal order notification email error:", err);
+        });
+      }
     } catch (error) {
       console.error("Error handling Update Order Payment Status:", error);
     } finally {
