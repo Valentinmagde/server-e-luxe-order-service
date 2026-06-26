@@ -64,32 +64,42 @@ class DBManager {
   }
 
   /**
-   * Connect to database.
+   * Connect to database, retrying with backoff instead of giving up on the
+   * first failure (e.g. MongoDB still starting up, or a transient network blip).
    *
    * @author Valentin Magde <valentinmagde@gmail.com>
    * @since 2023-08-28
    *
-   * @return {Promise<any>} the eventual completion or failure
+   * @param {number} initialDelayMs delay between retries, capped at 30s
+   * @return {Promise<any>} the eventual completion (never rejects — retries forever)
    */
-  public asyncOnConnect(): Promise<any> {
-    return new Promise((resolve, reject) => {
-      (async () => {
-        try {
-          mongoose
-          .connect(
-            `mongodb://${config.mongoDbUser}:${config.mongoDbPassword}@${config.mongoDbHost}:${
-            config.mongoDbPort}/${config.mongoDbName}?authSource=admin`
-          )
+  public asyncOnConnect(initialDelayMs = 3000): Promise<any> {
+    const uri = `mongodb://${config.mongoDbUser}:${config.mongoDbPassword}@${config.mongoDbHost}:${config.mongoDbPort}/${config.mongoDbName}?authSource=admin`;
+    let delayMs = initialDelayMs;
+
+    return new Promise((resolve) => {
+      const attempt = () => {
+        mongoose
+          .connect(uri)
           .then((dBConnection) => {
+            mongoose.connection.on("disconnected", () => {
+              console.warn("[DBManager] MongoDB disconnected — driver will attempt to reconnect automatically");
+            });
+            mongoose.connection.on("reconnected", () => {
+              console.log("[DBManager] MongoDB reconnected");
+            });
             resolve(dBConnection);
           })
           .catch((error) => {
-            reject(error);
+            console.error(
+              `[DBManager] MongoDB connection failed, retrying in ${delayMs / 1000}s:`,
+              error?.message || error
+            );
+            setTimeout(attempt, delayMs);
+            delayMs = Math.min(delayMs * 1.5, 30000);
           });
-        } catch (error) {
-          reject(error);
-        }
-      })();
+      };
+      attempt();
     });
   }
 
