@@ -8,12 +8,13 @@ const GRAY   = "#888888";
 const LIGHT  = "#f7f7f7";
 const BORDER = "#e0e0e0";
 
-const STORE_LOGO_URL = process.env.STORE_LOGO_URL  || "";
-const STORE_VAT      = process.env.STORE_VAT_NUMBER || "";
-const STORE_ADDRESS  = process.env.STORE_ADDRESS    || "8206 Louisiana Blvd NE, Ste A #4894, Albuquerque, NM 87113";
-const STORE_PHONE    = process.env.STORE_PHONE      || "+1 402 - 252 - 8545";
-const STORE_EMAIL    = process.env.STORE_EMAIL      || "contact@e-luxe.fr";
-const STORE_URL      = process.env.STORE_URL        || "e-luxe.fr";
+const STORE_LOGO_URL   = process.env.STORE_LOGO_URL    || "";
+const STORE_VAT        = process.env.STORE_VAT_NUMBER  || "";
+const STORE_TAX_NUMBER = process.env.STORE_TAX_NUMBER  || "98-1817993";
+const STORE_ADDRESS    = process.env.STORE_ADDRESS     || "8206 Louisiana Blvd NE, Ste A #4894, Albuquerque, NM 87113";
+const STORE_PHONE      = process.env.STORE_PHONE       || "+1 402 - 252 - 8545";
+const STORE_EMAIL      = process.env.STORE_EMAIL       || "contact@e-luxe.fr";
+const STORE_URL        = process.env.STORE_URL         || "e-luxe.fr";
 
 const EUR = (n: number) => `€${n.toFixed(2)}`;
 
@@ -54,44 +55,58 @@ export async function generateInvoicePdf(order: any): Promise<Buffer> {
     const items = order.order_items || [];
 
     // ── Header ──────────────────────────────────────────────────────────────
-    // Left: INVOICE title + VAT
+    // Left: INVOICE title + VAT/Tax numbers
     doc
       .fillColor(DARK)
       .font("Helvetica-Bold")
       .fontSize(26)
       .text("INVOICE", L, 50);
 
+    let leftY = 82;
+    doc.fillColor(GRAY).font("Helvetica").fontSize(10);
     if (STORE_VAT) {
-      doc
-        .fillColor(GRAY)
-        .font("Helvetica")
-        .fontSize(10)
-        .text(`Vat Number : ${STORE_VAT}`, L, 82);
+      doc.text(`Vat Number : ${STORE_VAT}`, L, leftY);
+      leftY += 14;
+    }
+    if (STORE_TAX_NUMBER) {
+      doc.text(`Tax ID : ${STORE_TAX_NUMBER}`, L, leftY);
+      leftY += 14;
     }
 
-    // Right: logo (image from URL or local file, fallback to text)
+    // Right: logo (image from URL or local file, fallback to text), constrained
+    // to a fixed box so its rendered height never overlaps the address block
+    // below it (the image's natural aspect ratio used to push past the gap).
     const logoW = 150;
+    const logoH = 45;
+    const logoTop = 38;
+    let rightBlockY = logoTop + logoH + 10;
+
     if (logoBuffer) {
-      doc.image(logoBuffer, R - logoW, 38, { width: logoW });
+      doc.image(logoBuffer, R - logoW, logoTop, {
+        fit: [logoW, logoH],
+        align: "right",
+        valign: "top",
+      } as any);
     } else {
       doc
         .fillColor(DARK)
         .font("Times-BoldItalic")
         .fontSize(22)
         .text("é-Luxe", L, 50, { width: W, align: "right" });
+      rightBlockY = 50 + 30;
     }
 
     // Address block (right-aligned, below logo)
     const addrLines = [STORE_ADDRESS, STORE_PHONE, STORE_EMAIL, STORE_URL];
     doc.fillColor(GRAY).font("Helvetica").fontSize(9);
-    let addrY = 78;
+    let addrY = rightBlockY;
     addrLines.forEach((line) => {
       doc.text(line, L, addrY, { width: W, align: "right" });
       addrY += doc.heightOfString(line, { width: W }) + 1;
     });
 
     // ── Separator 1 ─────────────────────────────────────────────────────────
-    const s1Y = 136;
+    const s1Y = Math.max(leftY, addrY + 8, 136);
     doc.moveTo(L, s1Y).lineTo(R, s1Y).strokeColor(BORDER).lineWidth(0.5).stroke();
 
     // ── Meta row: DATE | INVOICE NO | INVOICE TO ────────────────────────────

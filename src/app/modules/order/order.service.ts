@@ -1,6 +1,7 @@
 import Order from "./order.model";
 import * as jsonpatch from "fast-json-patch";
 import ldOrderService, { LdSubmitResult } from "./ld-order.service";
+import { calculateLdOrderPricing } from "../../utils/ld-pricing.util";
 
 /**
  * @author Valentin Magde <valentinmagde@gmail.com>
@@ -672,6 +673,27 @@ class OrderService {
             0
           );
           data.discount = Number(data.discount || 0) + itemsDiscount;
+
+          // Tax/shipping for Luxury Distribution items are recomputed
+          // server-side from the country + items, never trusted from the
+          // client (the client-side calculation is what actually gets
+          // charged at payment time, but the stored order must reflect the
+          // same authoritative rule rather than whatever was sent).
+          const ldPricing = calculateLdOrderPricing(
+            data.order_items,
+            data.shipping_address?.country
+          );
+          data.shipping_cost = ldPricing.shippingCost;
+          data.shipping_price = ldPricing.shippingPrice;
+          data.tax_price = ldPricing.taxPrice;
+
+          const recomputedTotal =
+            Number(data.items_price || 0) -
+            Number(data.discount || 0) +
+            ldPricing.shippingPrice +
+            ldPricing.taxPrice;
+          data.total_price = recomputedTotal;
+          data.total = recomputedTotal;
 
           const order = new Order(data);
 
