@@ -76,8 +76,8 @@ export async function generateInvoicePdf(order: any): Promise<Buffer> {
     // Right: logo (image from URL or local file, fallback to text), constrained
     // to a fixed box so its rendered height never overlaps the address block
     // below it (the image's natural aspect ratio used to push past the gap).
-    const logoW = 150;
-    const logoH = 45;
+    const logoW = 90;
+    const logoH = 27;
     const logoTop = 38;
     let rightBlockY = logoTop + logoH + 10;
 
